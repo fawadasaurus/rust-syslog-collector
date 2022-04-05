@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  envoy:
+    image: envoyproxy/envoy:v1.20-latest
+    ports:
+      - "10000:10000"
+      - "8514:8514/udp"
+      - "8468:8468"
+    volumes:
+      - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    ports:
+      - "514:514/udp"
+      - "1468:1468"
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    ports:
+      - "8123:8123/udp"
+    environment:
+      - SERVER_HOST=envoy

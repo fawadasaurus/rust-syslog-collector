@@ -1,6 +1,15 @@
 use std::thread;
-use std::net::{UdpSocket, TcpListener, TcpStream, Shutdown};
-use std::io::{Read, Write};
+use std::net::{UdpSocket, TcpListener, TcpStream};
+use std::io::{Read};
+use rsyslog::Message;
+
+fn print_message(row: &str) -> Result<(), String>{
+    //println!("{}", row);
+    let message: Message = rsyslog::Message::parse(row).map_err(|e| e.to_string())?;
+    println!("{:?}", message);
+
+    Ok(())
+}
 
 fn handle_udp_client(mut socket: UdpSocket) {
     let mut buf = [0; 4096];
@@ -11,7 +20,8 @@ fn handle_udp_client(mut socket: UdpSocket) {
                 thread::spawn(move || {
                     //println!("Handling connection from {}", &src);
                     let buf = &mut buf[..amt];
-                    println!("{}", std::str::from_utf8(&buf).unwrap());
+                    let row = std::str::from_utf8(&buf).unwrap();
+                    print_message(row);
                 });
             },
             Err(err) => {
@@ -22,19 +32,9 @@ fn handle_udp_client(mut socket: UdpSocket) {
 }
 
 fn handle_tcp_client(mut stream: TcpStream) {
-    let mut data = [0 as u8; 50]; // using 50 byte buffer
-    while match stream.read(&mut data) {
-        Ok(size) => {
-            // echo everything!
-            println!("{}", std::str::from_utf8(&data[0..size]).unwrap());
-            true
-        },
-        Err(_) => {
-            println!("An error occurred, terminating connection with {}", stream.peer_addr().unwrap());
-            stream.shutdown(Shutdown::Both).unwrap();
-            false
-        }
-    } {}
+    let mut data = String::new(); // using 50 byte buffer
+    stream.read_to_string(&mut data).unwrap();
+    print_message(&data);
 }
 
 fn main() -> std::io::Result<()> {
@@ -45,7 +45,7 @@ fn main() -> std::io::Result<()> {
         for stream in tcp_listener.incoming() {
             match stream {
                 Ok(stream) => {
-                    println!("New connection: {}", stream.peer_addr().unwrap());
+                    //println!("New connection: {}", stream.peer_addr().unwrap());
                     thread::spawn(move|| {
                         // connection succeeded
                         handle_tcp_client(stream)
@@ -57,11 +57,13 @@ fn main() -> std::io::Result<()> {
                 }
             }
         }
+        // close the socket server
+        drop(tcp_listener);
     });
 
 
-    let socket = UdpSocket::bind("127.0.0.1:8514")?;
-    println!("UDP listening on port 8514");
+    let socket = UdpSocket::bind("0.0.0.0:514")?;
+    println!("UDP listening on port 514");
     handle_udp_client(socket);
     Ok(())
 }
