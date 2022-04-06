@@ -1,0 +1,18 @@
+# Dockerfile
+
+# rust
+# https://hub.docker.com/_/rust
+
+ARG IMAGE=rust:1.59-slim
+
+FROM ${IMAGE}
+
+WORKDIR /app
+COPY ./syslog-server/. .
+
+# Use exist Cargo.toml or initialize it.
+RUN if [ ! -f "Cargo.toml" ]; then cargo init . ; fi
+RUN cargo install --path .
+
+
+CMD ["/app/target/release/syslog-server"]
