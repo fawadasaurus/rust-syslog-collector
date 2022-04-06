@@ -57,4 +57,4 @@ static_resources:
             address:
               socket_address:
                 address: server
-                port_value: 1469
+                port_value: 1468

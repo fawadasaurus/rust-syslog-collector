@@ -14,4 +14,5 @@ COPY ./syslog-server/. .
 RUN if [ ! -f "Cargo.toml" ]; then cargo init . ; fi
 RUN cargo install --path .
 
+
 CMD ["/app/target/release/syslog-server"]
