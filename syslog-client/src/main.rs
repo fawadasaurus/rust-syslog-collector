@@ -9,7 +9,7 @@ use std::env;
 fn main() {
     let mut server_host = env::var("SERVER_HOST").unwrap_or("".to_string());
 
-    println!("server host is {}",);
+    println!("server host is {}", server_host);
     if server_host == "" {
         println!("server host not found, defaulting to 0.0.0.0");
         server_host = "0.0.0.0".to_string();
