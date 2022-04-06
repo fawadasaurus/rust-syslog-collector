@@ -9,12 +9,14 @@ use std::env;
 fn main() {
     let mut server_host = env::var("SERVER_HOST").unwrap_or("".to_string());
 
+    println!("server host is {}",);
     if server_host == "" {
-       server_host = "0.0.0.0".to_string();
+        println!("server host not found, defaulting to 0.0.0.0");
+        server_host = "0.0.0.0".to_string();
     }
 
-    let udp_server = format!("{}:514", server_host);
-    let tcp_server = format!("{}:1468", server_host);
+    let udp_server = format!("{}:8514", server_host);
+    let tcp_server = format!("{}:8468", server_host);
 
     let formatter_udp = Formatter5424 {
         facility: Facility::LOG_USER,
