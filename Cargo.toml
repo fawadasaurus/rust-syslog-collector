@@ -1,0 +1,5 @@
+
+[workspace]
+members = ["syslog-client", "syslog-server", "syslog-vino"]
+
+exclude = []

@@ -1,10 +1,10 @@
 extern crate syslog;
 
-use syslog::{Facility, Formatter5424};
 use std::collections::HashMap;
+use std::env;
 use std::thread;
 use std::time;
-use std::env;
+use syslog::{Facility, Formatter5424};
 
 fn main() {
     let mut server_host = env::var("SERVER_HOST").unwrap_or("".to_string());
@@ -32,9 +32,9 @@ fn main() {
         pid: 0,
     };
 
-    let udp_thread = thread::spawn(move|| {
+    let udp_thread = thread::spawn(move || {
         thread::sleep(time::Duration::from_secs(5));
-        match syslog::udp(formatter_udp,"0.0.0.0:8123", &udp_server) {
+        match syslog::udp(formatter_udp, "0.0.0.0:8123", &udp_server) {
             Err(e) => println!("impossible to connect to syslog: {:?}", e),
             Ok(mut writer) => {
                 writer
@@ -44,15 +44,15 @@ fn main() {
         }
     });
 
-    let tcp_thread = thread::spawn(move|| {
+    let tcp_thread = thread::spawn(move || {
         thread::sleep(time::Duration::from_secs(5));
         for n in 1..10 {
             thread::sleep(time::Duration::from_secs(1));
             match syslog::tcp(formatter_tcp.clone(), &tcp_server) {
                 Err(e) => println!("impossible to connect to syslog: {:?}", e),
                 Ok(mut writer) => {
-                        let log = format!("{}{}","Hello from TCP ", n);
-                        writer
+                    let log = format!("{}{}", "Hello from TCP ", n);
+                    writer
                         .err((1, HashMap::new(), log))
                         .expect("could not write error message");
                 }

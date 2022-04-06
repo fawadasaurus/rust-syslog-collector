@@ -1,0 +1,21 @@
+[package]
+name = "syslog-vino"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = { version = "3.0", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
+tokio-stream = { version = "0.1" }
+anyhow = "1"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+syslog_rfc5424 = { path = "../rust-syslog-rfc5424", features = [
+  "serde-serialize",
+] }
+vino-host = { path = "../../vino/crates/vino/vino-host" }
+vino-transport = { path = "../../vino/sdk/crates/vino-transport", features = [
+  "all",
+] }
