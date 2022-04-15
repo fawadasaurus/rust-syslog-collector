@@ -90,6 +90,7 @@ use std::sync::Arc;
 use anyhow::Result;
 use clap::Parser;
 use syslog_rfc5424::SyslogMessage;
+use syslog_rfc5424::parse_message;
 use tokio::{
     io::AsyncReadExt,
     net::{TcpListener, UdpSocket},
@@ -106,6 +107,7 @@ use tokio_stream::StreamExt;
 use tracing::*;
 use vino_host::Host;
 use vino_transport::{MessageTransport, TransportMap};
+use serde_json;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -154,11 +156,13 @@ impl MessageHandler {
     }
 
     async fn handle_message(&self, row: &str) -> Result<()> {
-        debug!(row);
-        // let message = row.parse::<SyslogMessage>()?;
-        // info!("{:?}", message);
+        //let message = row.parse::<SyslogMessage>()?;
+        let message = parse_message(row).unwrap();
+        info!("{:?}", message);
+        let message_json = serde_json::to_string(&message).unwrap();
+        info!("{:?}", message_json);
 
-        let payload = TransportMap::from([("input", row)]);
+        let payload = TransportMap::from([("input", message_json)]);
         let mut stream = self.host.request("echo", payload, None).await?;
         let response: Vec<_> = stream.collect_port("output").await;
 
